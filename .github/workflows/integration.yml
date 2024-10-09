@@ -53,7 +53,7 @@ jobs:
 
     - name: Transfer files to VM
       run: |
-        scp -r -o StrictHostKeyChecking=no ./ ubuntu@${{ secrets.VM_IP }}:/home/ubuntu/app
+        scp -r -o StrictHostKeyChecking=no * ubuntu@${{ secrets.VM_IP }}:/home/ubuntu/app
 
     - name: Connect to VM and deploy
       run: |
