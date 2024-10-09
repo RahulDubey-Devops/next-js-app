@@ -14,14 +14,14 @@ jobs:
         node-version: [18.x, 20.x, 22.x]
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm install
-      - run: npm run build
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm install
+    - run: npm run build
 
   unit-test:
     runs-on: ubuntu-latest
@@ -30,44 +30,36 @@ jobs:
         node-version: [18.x, 20.x, 22.x]
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm install
-      - run: npm run test
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm install
+    - run: npm run test
 
   deploy:
     runs-on: ubuntu-latest
     needs: build  # Wait for the build job to finish
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Setup SSH Agent
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # - name: Transfer files to VM
-      #   run: |
-      #     echo "Transferring files to the VM..."
-      #     scp -rv -o StrictHostKeyChecking=no ./ ubuntu@${{ secrets.VM_IP }}:/home/ubuntu/app
-      #   env:
-      #     VM_IP: ${{ secrets.VM_IP }}
+    - name: Transfer files to VM
+      run: |
+        scp -r -o StrictHostKeyChecking=no ./ ubuntu@${{ secrets.VM_IP }}:/home/ubuntu/app
 
-      - name: Connect to VM and Deploy
-        run: |
-          echo "Connecting to the VM to deploy..."
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VM_IP }} << 'EOF'
-            echo "Deploying application..."
-            cd /home/ubuntu/app || exit 1
-            npm install || exit 1
-            npm run build || exit 1
-            pm2 restart all || pm2 start npm --name "my-app" -- run start
-            echo "Deployment completed."
-          EOF
-        env:
-          VM_IP: ${{ secrets.VM_IP }}
+    - name: Connect to VM and deploy
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VM_IP }} << 'EOF'
+          cd /home/ubuntu/app
+          npm install
+          npm run build
+          pm2 restart all || pm2 start npm --name "my-app" -- run start
+        EOF
