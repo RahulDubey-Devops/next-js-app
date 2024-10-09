@@ -1,5 +1,4 @@
-
-name: Integration
+name: Integration test
 
 on:
   push:
@@ -9,13 +8,10 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v4
@@ -28,13 +24,10 @@ jobs:
     - run: npm run build
 
   unit-test:
-
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v4
@@ -46,6 +39,33 @@ jobs:
     - run: npm i
     - run: npm run test
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build  # Wait for the build job to finish
+    steps:
+    - name: Deploy to VM
+      uses: actions/checkout@v4
 
+    - name: Setup SSH Agent
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-# this is new build
+    - name: Transfer files to VM
+      run: |
+        scp -r -o StrictHostKeyChecking=no ./ SSH_USER@VM_IP:/home/SSH_USER/app
+      env:
+        VM_IP: ${{ secrets.VM_IP }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+
+    - name: Connect to VM and deploy
+      run: |
+        ssh -o StrictHostKeyChecking=no SSH_USER@VM_IP << 'EOF'
+          cd /home/SSH_USER/app
+          npm install
+          npm run build
+          pm2 restart all || pm2 start npm --name "my-app" -- run start
+        EOF
+      env:
+        VM_IP: ${{ secrets.VM_IP }}
+        SSH_USER: ${{ secrets.SSH_USER }}
