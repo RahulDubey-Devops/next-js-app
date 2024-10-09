@@ -57,7 +57,7 @@ jobs:
 
     - name: Connect to VM and deploy
       run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VM_IP }} << 'EOF'
+        ssh -tt -o StrictHostKeyChecking=no ubuntu@${{ secrets.VM_IP }} << 'EOF'
           cd /home/ubuntu/app
           npm install
           npm run build
