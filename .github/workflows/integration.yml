@@ -52,9 +52,9 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Transfer files to VM
-      run: |
-        scp -r -o StrictHostKeyChecking=no ./ ubuntu@${{ secrets.VM_IP }}:/home/ubuntu/app
+    # - name: Transfer files to VM
+    #   run: |
+    #     scp -r -o StrictHostKeyChecking=no ./ ubuntu@${{ secrets.VM_IP }}:/home/ubuntu/app
 
     - name: Connect to VM and deploy
       run: |
