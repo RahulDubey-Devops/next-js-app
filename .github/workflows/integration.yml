@@ -53,7 +53,7 @@ jobs:
 
     - name: Transfer files to VM
       run: |
-        scp -r -o StrictHostKeyChecking=no ./ ubuntu@ec2-3-108-190-113.ap-south-1.compute.amazonaws.com:/home/ubuntu/app
+        scp  -v -r -o StrictHostKeyChecking=no ./ ubuntu@ec2-3-108-190-113.ap-south-1.compute.amazonaws.com:/home/ubuntu/app
       env:
         VM_IP: ${{ secrets.VM_IP }}
         SSH_USER: ${{ secrets.SSH_USER }}
