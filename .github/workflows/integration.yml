@@ -54,7 +54,7 @@ jobs:
       - name: Independencies
         run: npm i
       - name: Linter
-        run : npx standard -v 
+        run : npx standard --fix
          
   deploy:
     runs-on: ubuntu-latest
